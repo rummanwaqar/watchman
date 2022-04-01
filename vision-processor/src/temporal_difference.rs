@@ -1,6 +1,7 @@
 use opencv::core::Mat;
-use opencv::platform_types::size_t;
 use opencv::{prelude::*, *};
+
+use crate::helpers::*;
 
 pub struct TemporalDifference {
     frame1: Option<Mat>,
@@ -39,34 +40,4 @@ impl TemporalDifference {
 
         Ok(output)
     }
-}
-
-fn frame_difference(x1: &Mat, x2: &Mat) -> Result<Mat> {
-    let mut output = Mat::default();
-    opencv::core::absdiff(x1, x2, &mut output)?;
-    Ok(output)
-}
-
-fn bitwise_or(x1: &Mat, x2: &Mat) -> Result<Mat> {
-    let mut output = Mat::default();
-    opencv::core::bitwise_or(x1, x2, &mut output, &Mat::default())?;
-    Ok(output)
-}
-
-fn median_blur(x: &Mat, kernel_size: i32) -> Result<Mat> {
-    let mut output = Mat::default();
-    opencv::imgproc::median_blur(x, &mut output, kernel_size)?;
-    Ok(output)
-}
-
-fn binary_threshold(x: &Mat, thresh: f64, max_val: f64) -> Result<Mat> {
-    let mut output = Mat::default();
-    opencv::imgproc::threshold(
-        x,
-        &mut output,
-        thresh,
-        max_val,
-        opencv::imgproc::THRESH_BINARY,
-    )?;
-    Ok(output)
 }
