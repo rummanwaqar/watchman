@@ -21,11 +21,7 @@ impl TemporalDifference {
         }
     }
 
-    pub fn process(
-        &mut self,
-        frame: &Mat,
-        settings: Settings,
-    ) -> opencv::Result<Option<Mat>> {
+    pub fn process(&mut self, frame: &Mat, settings: Settings) -> opencv::Result<Option<Mat>> {
         let mut output: Option<Mat> = None;
 
         if self.frame1.is_some() && self.frame2.is_some() {

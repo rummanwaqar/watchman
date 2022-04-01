@@ -29,7 +29,7 @@ fn main() -> Result<()> {
     let mut temporal_difference = vision_processor::temporal_difference::TemporalDifference::new();
     let settings = vision_processor::temporal_difference::Settings {
         blur_size: 5,
-        thresh: 60.0
+        thresh: 60.0,
     };
     let output = temporal_difference.process(&image1, settings)?;
     if output.is_none() {
