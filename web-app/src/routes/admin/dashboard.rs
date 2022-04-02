@@ -29,6 +29,14 @@ pub async fn admin_dashboard(session: Session) -> Result<HttpResponse, actix_web
 </head>
 <body>
     <p>Welcome {username}!</p>
+    <p>Available actions:</p>
+<ol>
+    <li>
+        <form name="logoutForm" action="/admin/logout" method="post">
+            <input type="submit" value="Logout">
+        </form>
+    </li>
+</ol>
 </body>
 </html>"#
         )))
