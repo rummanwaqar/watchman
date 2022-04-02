@@ -15,3 +15,4 @@ anyhow = "1.0.56"
 urlencoding = "2"
 htmlescape = "0.3"
 actix-web-flash-messages = { version = "0.3", features = ["cookies"] }
+actix-session = { version = "0.6", features = ["redis-rs-tls-session"] }
