@@ -35,12 +35,24 @@ impl BackgroundSubtraction {
     pub fn update_background(
         &mut self,
         frame: &Mat,
-        mask: Option<&Mat>,
+        mask: &Mat,
         settings: Settings,
     ) -> opencv::Result<()> {
         if self.bg.is_none() {
             self.bg = Some(frame.clone());
         } else {
+            // create update image with background pixels from new image,
+            // and use the existing image for the rest of the pixels
+
+            // since we don't want to update the background with foreground pixels
+            // we apply a mask to the image to select only background pixels
+            let masked_bg = apply_mask(frame, &bitwise_not(mask)?)?;
+
+            // if foreground don't update
+            // if background alpha * foreground + (1 - alpha) * background
+
+            // mask is zero for background and 255 for foreground
+            // invert the mask so it is a background mask
         }
 
         Ok(())

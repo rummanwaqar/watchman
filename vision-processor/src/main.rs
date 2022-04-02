@@ -5,6 +5,10 @@ use opencv::ximgproc::threshold;
 use opencv::{highgui, imgcodecs, imgproc, prelude::*, videoio, Result};
 use std::env;
 
+use vision_processor::background_subtraction;
+use vision_processor::helpers::{add, apply_mask, bitwise_not, weighted_sum};
+use vision_processor::temporal_difference;
+
 fn main() -> Result<()> {
     let path = env::current_dir()
         .unwrap()
@@ -26,54 +30,52 @@ fn main() -> Result<()> {
     )?;
     highgui::named_window("window", highgui::WINDOW_FULLSCREEN)?;
 
-    let mut temporal_difference = vision_processor::temporal_difference::TemporalDifference::new();
-    let settings = vision_processor::temporal_difference::Settings {
-        blur_size: 5,
-        thresh: 60.0,
-    };
-    let output = temporal_difference.process(&image1, settings)?;
-    if output.is_none() {
-        println!("first image good");
-    }
-    let output = temporal_difference.process(&image2, settings)?;
-    if output.is_none() {
-        println!("second image good");
-    }
-    let output = temporal_difference.process(&image3, settings)?;
-    if output.is_some() {
-        println!("got something for image 3");
+    // let mut temporal_difference = temporal_difference::TemporalDifference::new();
+    // let settings = temporal_difference::Settings {
+    //     blur_size: 5,
+    //     thresh: 60.0,
+    // };
+    // let output = temporal_difference.process(&image1, settings)?;
+    // if output.is_none() {
+    //     println!("first image good");
+    // }
+    // let output = temporal_difference.process(&image2, settings)?;
+    // if output.is_none() {
+    //     println!("second image good");
+    // }
+    // let output = temporal_difference.process(&image3, settings)?;
+    // if output.is_some() {
+    //     println!("got something for image 3");
+    //
+    //     highgui::imshow("window", &output.as_ref().unwrap())?;
+    //     wait_key(0)?;
+    // }
 
-        highgui::imshow("window", &output.as_ref().unwrap())?;
+    let kernel = opencv::core::Mat::ones(3, 3, 1)?.to_mat()?;
+    println!("{:?}", kernel);
+
+    let mut bg_sub = background_subtraction::BackgroundSubtraction::new();
+    let settings = background_subtraction::Settings {
+        thresh: 50.0,
+        blur_size: 3,
+    };
+    bg_sub.update_background(&image1, &Mat::default(), settings)?;
+    let output = bg_sub.calculate_difference(&image3, settings)?;
+    if output.is_some() {
+        let mask = output.as_ref().unwrap();
+
+
+
+        let new_pixels = apply_mask(&image3, &bitwise_not(mask)?)?;
+        let old_pixels = apply_mask(&image1, mask)?;
+
+        let new_update = add(&new_pixels, &old_pixels)?;
+
+        let new_bg = weighted_sum(&new_update, &image1, 0.8)?;
+
+        highgui::imshow("window", &new_update)?;
         wait_key(0)?;
     }
-
-    // let image3 = imread(path.join("in000003.jpg").to_str().unwrap(),
-    //                     imgcodecs::IMREAD_GRAYSCALE)?;
-
-    // highgui::named_window("window", highgui::WINDOW_FULLSCREEN)?;
-    // highgui::imshow("window", &image1)?;
-    //
-    // highgui::named_window("window1", highgui::WINDOW_FULLSCREEN)?;
-    // highgui::imshow("window1", &image2)?;
-    //
-    // let mut delta = Mat::default();
-    // absdiff(&image1, &image2, &mut delta)?;
-    //
-    // highgui::named_window("delta", highgui::WINDOW_FULLSCREEN)?;
-    // highgui::imshow("delta", &delta)?;
-    //
-    // highgui::named_window("threshold", highgui::WINDOW_FULLSCREEN)?;
-    // let mut threshold_mat = Mat::default();
-    // imgproc::threshold(
-    //     &delta,
-    //     &mut threshold_mat,
-    //     60.0,
-    //     255.0,
-    //     imgproc::THRESH_BINARY,
-    // )?;
-    //
-    // highgui::imshow("threshold", &threshold_mat)?;
-    // highgui::wait_key(0)?;
 
     // let camera_id = 4;
     // let mut cam = videoio::VideoCapture::new(camera_id, videoio::CAP_ANY)?;
