@@ -1,7 +1,18 @@
 use actix_web::HttpResponse;
 use actix_web::http::header::ContentType;
 
-pub async fn login_form() -> HttpResponse {
+use actix_web_flash_messages::{IncomingFlashMessages, Level};
+use std::fmt::Write;
+
+
+pub async fn login_form(flash_messages: IncomingFlashMessages) -> HttpResponse {
+    let mut error_html = String::new();
+    for m in flash_messages.iter().filter(|m| m.level() == Level::Error) {
+        writeln!(error_html, "<p><i>{}</i></p>", m.content()).unwrap();
+        // add to html
+    }
+    println!("{}", error_html);
+
     HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(include_str!("login.html"))

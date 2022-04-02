@@ -14,3 +14,4 @@ thiserror = "1.0.30"
 anyhow = "1.0.56"
 urlencoding = "2"
 htmlescape = "0.3"
+actix-web-flash-messages = { version = "0.3", features = ["cookies"] }

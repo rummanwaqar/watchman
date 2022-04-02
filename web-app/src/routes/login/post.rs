@@ -3,6 +3,7 @@ use actix_web::http::header::LOCATION;
 use actix_web::{HttpResponse, ResponseError};
 use actix_web::http::StatusCode;
 use actix_web::web;
+use actix_web_flash_messages::FlashMessage;
 use secrecy::Secret;
 
 use crate::authentication::{AuthError, Credentials, validate_credentials};
@@ -19,13 +20,20 @@ pub async fn login(form: web::Form<FormData>) -> Result<HttpResponse, LoginError
         password: form.0.password
     };
 
-    validate_credentials(credentials).map_err(|e| match e {
-        AuthError::InvalidCredentials(_) => { LoginError::AuthError(e.into())}
-        AuthError::UnexpectedError(_) => { LoginError::UnexpectedError(e.into())}
-    })?;
-    Ok(HttpResponse::SeeOther()
-        .insert_header((LOCATION, "/"))
-        .finish())
+    match validate_credentials(credentials) {
+        Ok(_) => {
+            Ok(HttpResponse::SeeOther()
+                .insert_header((LOCATION, "/"))
+                .finish())
+        }
+        Err(e) => {
+            FlashMessage::error(e.to_string()).send();
+            Ok(HttpResponse::SeeOther()
+                // No cookies here now!
+                .insert_header((LOCATION, "/login"))
+                .finish())
+        }
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
