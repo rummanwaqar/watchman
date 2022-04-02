@@ -1,5 +1,5 @@
-use std::fmt::Error;
 use secrecy::{ExposeSecret, Secret};
+use std::fmt::Error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthError {
@@ -19,6 +19,8 @@ pub fn validate_credentials(credentials: Credentials) -> Result<(), AuthError> {
     if credentials.username == "admin" && credentials.password.expose_secret() == "password" {
         Ok(())
     } else {
-        Err(AuthError::InvalidCredentials(anyhow::Error::new(Error::default())))
+        Err(AuthError::InvalidCredentials(anyhow::Error::new(
+            Error::default(),
+        )))
     }
 }

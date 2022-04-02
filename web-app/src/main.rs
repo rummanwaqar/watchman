@@ -7,9 +7,9 @@ mod authentication;
 use actix_files as fs;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
+use actix_web::cookie::Key;
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::FlashMessagesFramework;
-use actix_web::cookie::Key;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
             .route("/login", web::post().to(login))
             .service(fs::Files::new("/data", "/home/rumman/Videos"))
     })
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }

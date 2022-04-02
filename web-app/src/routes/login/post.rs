@@ -1,31 +1,29 @@
-use std::fmt::{Display, Error, Formatter};
 use actix_web::http::header::LOCATION;
-use actix_web::{HttpResponse, ResponseError};
 use actix_web::http::StatusCode;
 use actix_web::web;
+use actix_web::{HttpResponse, ResponseError};
 use actix_web_flash_messages::FlashMessage;
 use secrecy::Secret;
+use std::fmt::{Display, Error, Formatter};
 
-use crate::authentication::{AuthError, Credentials, validate_credentials};
+use crate::authentication::{validate_credentials, AuthError, Credentials};
 
 #[derive(serde::Deserialize, Debug)]
 pub struct FormData {
     username: String,
-    password: Secret<String>
+    password: Secret<String>,
 }
 
 pub async fn login(form: web::Form<FormData>) -> Result<HttpResponse, LoginError> {
     let credentials = Credentials {
         username: form.0.username,
-        password: form.0.password
+        password: form.0.password,
     };
 
     match validate_credentials(credentials) {
-        Ok(_) => {
-            Ok(HttpResponse::SeeOther()
-                .insert_header((LOCATION, "/"))
-                .finish())
-        }
+        Ok(_) => Ok(HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/"))
+            .finish()),
         Err(e) => {
             FlashMessage::error(e.to_string()).send();
             Ok(HttpResponse::SeeOther()
