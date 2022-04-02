@@ -39,6 +39,7 @@ async fn main() -> std::io::Result<()> {
             .route("/admin/dashboard", web::get().to(admin_dashboard))
             .route("/admin/logout", web::post().to(log_out))
             .service(fs::Files::new("/data", "/home/rumman/Videos"))
+            .service(fs::Files::new("/static", "static"))
     })
     .bind(("127.0.0.1", 8080))?
     .run()
