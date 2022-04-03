@@ -8,7 +8,7 @@ use secrecy::Secret;
 use tera::Context;
 
 use crate::authentication::{validate_credentials, AuthError, Credentials};
-use crate::utils::{e500, see_other};
+use crate::utils::see_other;
 use crate::AppState;
 
 pub async fn get(

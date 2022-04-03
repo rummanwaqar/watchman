@@ -5,13 +5,15 @@
 {% include "navbar.html" %}
 
 <div class="container pt-5">
-    <div>
-        <h4 class="text-muted inline pull-left">Recorded on 35-July-2923 3:40PM</h4>
-        <button class="btn btn-outline-danger">Delete</button>
+    <div class="d-flex justify-content-between">
+        <h4 class="text-muted">{{ date_time }}</h4>
+        <form action="/admin/video/delete/{{ filename }}" method="post">
+            <button class="btn btn-outline-danger mb-3" type="submit">Delete</button>
+        </form>
     </div>
 
     <video class="img-fluid" controls>
-        <source src="/admin/data/simplescreenrecorder-2021-11-23_14.41.22.mp4" type="video/mp4">
+        <source src="/admin/data/{{ filename }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>

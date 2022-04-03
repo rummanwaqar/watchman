@@ -20,6 +20,7 @@ pub struct AppState {
     tera: Tera,
     username: String,
     password: Secret<String>,
+    data_path: String,
 }
 
 pub async fn run(
@@ -38,6 +39,7 @@ pub async fn run(
                 tera: Tera::new("templates/**/*").unwrap(),
                 username: config.username.clone(),
                 password: config.password.clone(),
+                data_path: config.data_directory.clone(),
             }))
             .wrap(message_framework.clone())
             .wrap(SessionMiddleware::new(redis_store.clone(), key.clone()))
@@ -47,7 +49,8 @@ pub async fn run(
                 web::scope("/admin")
                     .wrap(from_fn(reject_anonymous_users))
                     .route("/", web::get().to(routes::videos::get))
-                    .route("/video", web::get().to(routes::video::get))
+                    .route("/video/{id}", web::get().to(routes::video::get))
+                    .route("/video/delete/{id}", web::post().to(routes::video::delete))
                     .route("/logout", web::post().to(routes::logout::post))
                     .service(fs::Files::new("/data", config.data_directory.clone())),
             )
