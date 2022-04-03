@@ -15,6 +15,7 @@ mod authentication;
 pub mod configuration;
 mod routes;
 mod utils;
+mod video_file;
 
 pub struct AppState {
     tera: Tera,

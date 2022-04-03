@@ -1,9 +1,8 @@
 use crate::utils::see_other;
+use crate::video_file::VideoFile;
 use crate::AppState;
 use actix_web::{web, HttpResponse, Responder};
-use chrono::{DateTime, Utc};
 use std::fs;
-use std::path::Path;
 use tera::Context;
 
 pub async fn get(
@@ -11,26 +10,21 @@ pub async fn get(
     username: web::ReqData<String>,
     path: web::Path<String>,
 ) -> impl Responder {
-    let filename = path.into_inner();
-    let path = Path::new(data.data_path.as_str()).join(&filename);
-    if !path.exists() && path.extension().unwrap() == "mp4" {
-        return see_other("/admin/");
+    match VideoFile::new(&path.into_inner(), &data.data_path) {
+        Some(video_file) => {
+            let mut ctx = Context::new();
+            ctx.insert("username", username.into_inner().as_str());
+            ctx.insert("video", &video_file);
+            let rendered = data.tera.render("video.html", &ctx).unwrap();
+            HttpResponse::Ok().body(rendered)
+        }
+        None => see_other("/admin/"),
     }
-    let date_time: DateTime<Utc> = fs::metadata(&path).unwrap().created().unwrap().into();
-    let mut ctx = Context::new();
-    ctx.insert("username", username.into_inner().as_str());
-    ctx.insert("filename", filename.as_str());
-    ctx.insert("date_time", date_time.format("%v %r").to_string().as_str());
-    let rendered = data.tera.render("video.html", &ctx).unwrap();
-    HttpResponse::Ok().body(rendered)
 }
 
 pub async fn delete(data: web::Data<AppState>, path: web::Path<String>) -> impl Responder {
-    let filename = path.into_inner();
-    let path = Path::new(data.data_path.as_str()).join(&filename);
-    if !path.exists() && path.extension().unwrap() == "mp4" {
-        return see_other("/admin/");
+    if let Some(video_file) = VideoFile::new(&path.into_inner(), &data.data_path) {
+        fs::remove_file(video_file.path);
     }
-    fs::remove_file(path);
     see_other("/admin")
 }
