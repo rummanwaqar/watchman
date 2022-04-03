@@ -10,8 +10,8 @@ where
     actix_web::error::ErrorInternalServerError(e)
 }
 
-pub async fn log_out(session: Session) -> Result<HttpResponse, actix_web::Error> {
-    if let Some(user_id) = session.get::<String>("user_id").map_err(e500)? {
+pub async fn post(session: Session) -> Result<HttpResponse, actix_web::Error> {
+    if let Some(user_id) = session.get::<String>("username").map_err(e500)? {
         session.purge();
         FlashMessage::error("You have successfully logged out.").send();
     }
