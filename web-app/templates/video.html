@@ -8,14 +8,17 @@
     <div class="d-flex justify-content-between">
         <h4 class="text-muted">{{ video.date_time }}</h4>
         <form action="/admin/video/delete/{{ video.filename }}" method="post">
-            <button class="btn btn-outline-danger mb-3" type="submit">Delete</button>
+            <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
         </form>
     </div>
 
-    <video class="img-fluid" controls>
-        <source src="/admin/data/{{ video.filename }}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+    <div class="d-flex justify-content-center">
+        <video class="img-fluid " controls>
+            <source src="/admin/data/{{ video.filename }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
 </div>
 
 {% endblock content %}

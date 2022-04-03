@@ -1,5 +1,3 @@
-use std::fs;
-use std::fs::FileType;
 use std::net::TcpListener;
 use web_app::configuration::get_configuration;
 use web_app::run;

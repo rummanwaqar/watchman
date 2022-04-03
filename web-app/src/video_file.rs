@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use std::fs;
 use std::path::Path;
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Debug)]
 pub struct VideoFile {
     pub filename: String,
     pub date_time: String,
@@ -22,4 +22,20 @@ impl VideoFile {
             path: path.as_path().to_str().unwrap().to_string(),
         })
     }
+}
+
+pub fn get_videos_from_path(path: &str) -> Vec<VideoFile> {
+    let mut output = Vec::new();
+    if let Ok(files) = fs::read_dir(path) {
+        for entry in files {
+            if let Ok(entry) = entry {
+                if let Some(video_file) =
+                    VideoFile::new(entry.path().file_name().unwrap().to_str().unwrap(), path)
+                {
+                    output.push(video_file);
+                }
+            }
+        }
+    }
+    output
 }

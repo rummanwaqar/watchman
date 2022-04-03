@@ -24,7 +24,7 @@ pub async fn get(
 
 pub async fn delete(data: web::Data<AppState>, path: web::Path<String>) -> impl Responder {
     if let Some(video_file) = VideoFile::new(&path.into_inner(), &data.data_path) {
-        fs::remove_file(video_file.path);
+        fs::remove_file(video_file.path).unwrap();
     }
     see_other("/admin")
 }
