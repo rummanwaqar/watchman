@@ -11,9 +11,7 @@ use tera::Tera;
 
 mod authentication;
 pub mod configuration;
-mod login;
-mod logout;
-mod videos;
+mod routes;
 
 pub struct AppState {
     tera: Tera,
@@ -40,10 +38,11 @@ pub async fn run(
             }))
             .wrap(message_framework.clone())
             .wrap(SessionMiddleware::new(redis_store.clone(), key.clone()))
-            .route("/", web::get().to(videos::get))
-            .route("/login", web::get().to(login::get))
-            .route("/login", web::post().to(login::post))
-            .route("/logout", web::post().to(logout::post))
+            .route("/", web::get().to(routes::videos::get))
+            .route("/video", web::get().to(routes::video::get))
+            .route("/login", web::get().to(routes::login::get))
+            .route("/login", web::post().to(routes::login::post))
+            .route("/logout", web::post().to(routes::logout::post))
             .service(fs::Files::new("/static", "static"))
             .service(fs::Files::new("/data", config.data_directory.clone()))
     })

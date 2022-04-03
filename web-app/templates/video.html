@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include "navbar.html" %}
+
+<div class="container pt-5">
+    <div>
+        <h4 class="text-muted inline pull-left">Recorded on 35-July-2923 3:40PM</h4>
+        <button class="btn btn-outline-danger">Delete</button>
+    </div>
+
+    <video class="img-fluid" controls>
+        <source src="data/simplescreenrecorder-2021-11-23_14.41.22.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+{% endblock content %}
