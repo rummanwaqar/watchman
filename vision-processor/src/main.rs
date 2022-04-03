@@ -3,78 +3,59 @@ use opencv::highgui::wait_key;
 use opencv::imgcodecs::imread;
 use opencv::ximgproc::threshold;
 use opencv::{highgui, imgcodecs, imgproc, prelude::*, videoio, Result};
-use std::env;
+use std::fs::DirEntry;
+use std::{env, fs};
 
 use vision_processor::background_subtraction;
-use vision_processor::helpers::{add, apply_mask, bitwise_not, weighted_sum};
+use vision_processor::helpers::{add, apply_mask, bitwise_not, bitwise_or, weighted_sum};
 use vision_processor::temporal_difference;
 
 fn main() -> Result<()> {
     let path = env::current_dir()
         .unwrap()
         .join("data")
-        .join("office")
+        .join("PETS2006")
         .join("input");
 
-    let image1 = imread(
-        path.join("in000001.jpg").to_str().unwrap(),
-        imgcodecs::IMREAD_GRAYSCALE,
-    )?;
-    let image2 = imread(
-        path.join("in000002.jpg").to_str().unwrap(),
-        imgcodecs::IMREAD_GRAYSCALE,
-    )?;
-    let image3 = imread(
-        path.join("in000750.jpg").to_str().unwrap(),
-        imgcodecs::IMREAD_GRAYSCALE,
-    )?;
-    highgui::named_window("window", highgui::WINDOW_FULLSCREEN)?;
+    let files = get_file_list(path.to_str().unwrap());
 
-    // let mut temporal_difference = temporal_difference::TemporalDifference::new();
-    // let settings = temporal_difference::Settings {
-    //     blur_size: 5,
-    //     thresh: 60.0,
-    // };
-    // let output = temporal_difference.process(&image1, settings)?;
-    // if output.is_none() {
-    //     println!("first image good");
-    // }
-    // let output = temporal_difference.process(&image2, settings)?;
-    // if output.is_none() {
-    //     println!("second image good");
-    // }
-    // let output = temporal_difference.process(&image3, settings)?;
-    // if output.is_some() {
-    //     println!("got something for image 3");
-    //
-    //     highgui::imshow("window", &output.as_ref().unwrap())?;
-    //     wait_key(0)?;
-    // }
+    highgui::named_window("input", highgui::WINDOW_FULLSCREEN)?;
+    highgui::named_window("temporal", highgui::WINDOW_FULLSCREEN)?;
+    highgui::named_window("bg_sub", highgui::WINDOW_FULLSCREEN)?;
+    highgui::named_window("combined_mask", highgui::WINDOW_FULLSCREEN)?;
 
-    let kernel = opencv::core::Mat::ones(3, 3, 1)?.to_mat()?;
-    println!("{:?}", kernel);
+    let mut temporal_difference =
+        temporal_difference::TemporalDifference::new(temporal_difference::Settings {
+            blur_size: 5,
+            thresh: 60.0,
+        });
+    let mut bg_sub =
+        background_subtraction::BackgroundSubtraction::new(background_subtraction::Settings {
+            thresh: 50.0,
+            blur_size: 3,
+            alpha: 0.01,
+        });
 
-    let mut bg_sub = background_subtraction::BackgroundSubtraction::new();
-    let settings = background_subtraction::Settings {
-        thresh: 50.0,
-        blur_size: 3,
-    };
-    bg_sub.update_background(&image1, &Mat::default(), settings)?;
-    let output = bg_sub.calculate_difference(&image3, settings)?;
-    if output.is_some() {
-        let mask = output.as_ref().unwrap();
+    let mut count = 0;
+    for image_file in files {
+        let image = imread(&image_file, imgcodecs::IMREAD_GRAYSCALE)?;
+        let bg_sub_output = bg_sub.update(&image)?;
+        let temporal_output = temporal_difference.process(&image)?;
 
+        highgui::imshow("input", &image)?;
+        if temporal_output.is_some() && bg_sub_output.is_some() {
+            let bg_sub = bg_sub_output.as_ref().unwrap();
+            let temporal_sub = temporal_output.as_ref().unwrap();
 
+            highgui::imshow("bg_sub", bg_sub)?;
+            highgui::imshow("temporal", &temporal_sub)?;
 
-        let new_pixels = apply_mask(&image3, &bitwise_not(mask)?)?;
-        let old_pixels = apply_mask(&image1, mask)?;
-
-        let new_update = add(&new_pixels, &old_pixels)?;
-
-        let new_bg = weighted_sum(&new_update, &image1, 0.8)?;
-
-        highgui::imshow("window", &new_update)?;
-        wait_key(0)?;
+            let mask = bitwise_or(bg_sub, bg_sub)?;
+            highgui::imshow("combined_mask", &mask)?;
+        }
+        count += 1;
+        println!("{}", count);
+        highgui::wait_key(0)?;
     }
 
     // let camera_id = 4;
@@ -93,4 +74,13 @@ fn main() -> Result<()> {
     // }
 
     Ok(())
+}
+
+fn get_file_list(path: &str) -> Vec<String> {
+    let mut files = vec![];
+    for entry in fs::read_dir(path).unwrap() {
+        files.push(entry.unwrap().path().to_str().unwrap().to_string());
+    }
+    files.sort();
+    files
 }

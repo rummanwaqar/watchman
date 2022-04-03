@@ -44,7 +44,8 @@ pub fn median_blur(x: &Mat, kernel_size: i32) -> Result<Mat> {
 }
 
 pub fn dilate(x: &Mat, kernel_size: i32) -> Result<Mat> {
-    let kernel = opencv::core::Mat::ones(kernel_size, kernel_size, opencv::core::CV_8S)?.to_mat()?;
+    let kernel =
+        opencv::core::Mat::ones(kernel_size, kernel_size, opencv::core::CV_8S)?.to_mat()?;
     let mut output = Mat::default();
 
     Ok(output)
