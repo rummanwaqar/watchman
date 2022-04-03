@@ -8,12 +8,18 @@ use secrecy::Secret;
 use tera::Context;
 
 use crate::authentication::{validate_credentials, AuthError, Credentials};
+use crate::utils::{e500, see_other};
 use crate::AppState;
 
 pub async fn get(
     data: web::Data<AppState>,
     flash_messages: IncomingFlashMessages,
+    session: Session,
 ) -> impl Responder {
+    if session.get::<String>("username").unwrap().is_some() {
+        return see_other("/admin/");
+    }
+
     let mut error_message = String::new();
     for m in flash_messages.iter().filter(|m| m.level() == Level::Error) {
         error_message += m.content();
@@ -50,7 +56,7 @@ pub async fn post(
                 .insert("username", "admin")
                 .map_err(|e| login_redirect(LoginError::UnexpectedError(e.into())))?;
             Ok(HttpResponse::SeeOther()
-                .insert_header((LOCATION, "/"))
+                .insert_header((LOCATION, "/admin/"))
                 .finish())
         }
         Err(e) => {
@@ -85,8 +91,5 @@ impl ResponseError for LoginError {
 
 fn login_redirect(e: LoginError) -> InternalError<LoginError> {
     FlashMessage::error(e.to_string()).send();
-    let response = HttpResponse::SeeOther()
-        .insert_header((LOCATION, "/login"))
-        .finish();
-    InternalError::from_response(e, response)
+    InternalError::from_response(e, see_other("/login"))
 }

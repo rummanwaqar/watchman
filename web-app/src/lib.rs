@@ -1,3 +1,4 @@
+use crate::authentication::reject_anonymous_users;
 use actix_files as fs;
 use actix_session::storage::RedisSessionStore;
 use actix_session::SessionMiddleware;
@@ -5,6 +6,7 @@ use actix_web::cookie::Key;
 use actix_web::{web, App, HttpServer};
 use actix_web_flash_messages::storage::CookieMessageStore;
 use actix_web_flash_messages::FlashMessagesFramework;
+use actix_web_lab::middleware::from_fn;
 use secrecy::{ExposeSecret, Secret};
 use std::net::TcpListener;
 use tera::Tera;
@@ -12,6 +14,7 @@ use tera::Tera;
 mod authentication;
 pub mod configuration;
 mod routes;
+mod utils;
 
 pub struct AppState {
     tera: Tera,
@@ -38,13 +41,18 @@ pub async fn run(
             }))
             .wrap(message_framework.clone())
             .wrap(SessionMiddleware::new(redis_store.clone(), key.clone()))
-            .route("/", web::get().to(routes::videos::get))
-            .route("/video", web::get().to(routes::video::get))
             .route("/login", web::get().to(routes::login::get))
             .route("/login", web::post().to(routes::login::post))
-            .route("/logout", web::post().to(routes::logout::post))
+            .service(
+                web::scope("/admin")
+                    .wrap(from_fn(reject_anonymous_users))
+                    .route("/", web::get().to(routes::videos::get))
+                    .route("/video", web::get().to(routes::video::get))
+                    .route("/logout", web::post().to(routes::logout::post))
+                    .service(fs::Files::new("/data", config.data_directory.clone())),
+            )
             .service(fs::Files::new("/static", "static"))
-            .service(fs::Files::new("/data", config.data_directory.clone()))
+            .default_service(web::get().to(routes::login::get))
     })
     .listen(listener)?
     .run()

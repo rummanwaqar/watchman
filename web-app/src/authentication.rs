@@ -1,7 +1,35 @@
+use crate::utils::{e500, see_other};
 use crate::AppState;
-use actix_web::web;
+use actix_session::Session;
+use actix_web::body::MessageBody;
+use actix_web::dev::{ServiceRequest, ServiceResponse};
+use actix_web::error::InternalError;
+use actix_web::{web, FromRequest, HttpMessage};
+use actix_web_lab::middleware::Next;
 use secrecy::{ExposeSecret, Secret};
 use std::fmt::Error;
+
+pub async fn reject_anonymous_users(
+    mut req: ServiceRequest,
+    next: Next<impl MessageBody>,
+) -> Result<ServiceResponse<impl MessageBody>, actix_web::Error> {
+    let session = {
+        let (http_request, payload) = req.parts_mut();
+        Session::from_request(http_request, payload).await
+    }?;
+
+    match session.get::<String>("username").map_err(e500)? {
+        Some(username) => {
+            req.extensions_mut().insert(username);
+            next.call(req).await
+        }
+        None => {
+            let response = see_other("/login");
+            let e = anyhow::anyhow!("The user has not logged in");
+            Err(InternalError::from_response(e, response).into())
+        }
+    }
+}
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthError {

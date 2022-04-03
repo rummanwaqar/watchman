@@ -12,21 +12,15 @@ name = "watchman-server"
 
 [dependencies]
 actix-web = "4"
+actix-files = "^0.6"
+actix-web-flash-messages = { version = "0.3", features = ["cookies"] }
+actix-session = { version = "0.6", features = ["redis-rs-tls-session"] }
+actix-web-lab = "0.15"
 config = "0.12"
 tera = "1.15"
-
-
-
-actix-files = "^0.6"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "^1.0", features = ["derive"] }
 secrecy = {version = "^0.8", features = ["serde"] }
 thiserror = "1.0.30"
 anyhow = "1.0.56"
 urlencoding = "2"
-htmlescape = "0.3"
-actix-web-flash-messages = { version = "0.3", features = ["cookies"] }
-actix-session = { version = "0.6", features = ["redis-rs-tls-session"] }
-
-[dev-dependencies]
-reqwest = "0.11"
