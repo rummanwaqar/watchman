@@ -7,6 +7,7 @@ pub struct VideoFile {
     pub filename: String,
     pub date_time: String,
     pub path: String,
+    pub image_name: String,
 }
 
 impl VideoFile {
@@ -15,11 +16,22 @@ impl VideoFile {
         if !path.exists() || path.extension().unwrap() != "mp4" {
             return None;
         }
+        let mut image_path = path.clone();
+        image_path.set_extension("png");
+        if !image_path.exists() {
+            return None;
+        }
         let date_time: DateTime<Utc> = fs::metadata(&path).unwrap().created().unwrap().into();
         Some(VideoFile {
             filename: filename.to_string(),
             date_time: date_time.format("%v %r").to_string(),
             path: path.as_path().to_str().unwrap().to_string(),
+            image_name: image_path
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string(),
         })
     }
 }
