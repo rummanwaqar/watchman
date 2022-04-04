@@ -58,7 +58,7 @@ pub fn write_files(recorder: &Recorder) -> String {
 
     // write video
     let codec =
-        opencv::videoio::VideoWriter::fourcc('m' as i8, 'p' as i8, '4' as i8, 'v' as i8).unwrap();
+        opencv::videoio::VideoWriter::fourcc('a' as i8, 'v' as i8, 'c' as i8, '1' as i8).unwrap();
     let framerate = recorder.frames.len() as f64 / recorder.settings.video_length as f64;
     let frame_size = opencv::core::Size::new(recorder.frames[0].cols(), recorder.frames[0].rows());
     let mut writer = opencv::videoio::VideoWriter::new(

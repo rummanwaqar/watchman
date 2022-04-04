@@ -9,13 +9,16 @@ fn main() -> opencv::Result<()> {
 
     loop {
         let frame = camera.read()?;
+        // allow camera to properly turn on
+        if camera.frame_count() < 10 {
+            continue;
+        }
+
         let (_mat, motion_detected) = motion_detector.process(&frame)?;
 
-        if recorder.is_none() {
-            if motion_detected {
-                println!("Motion detected, starting recording.");
-                recorder = Some(recorder::Recorder::new(&config.recorder));
-            }
+        if recorder.is_none() && motion_detected {
+            println!("Motion detected, starting recording.");
+            recorder = Some(recorder::Recorder::new(&config.recorder));
         }
 
         if recorder.is_some() {
@@ -30,5 +33,6 @@ fn main() -> opencv::Result<()> {
 
         thread::sleep(time::Duration::from_millis(66));
     }
+    #[allow(unreachable_code)]
     Ok(())
 }

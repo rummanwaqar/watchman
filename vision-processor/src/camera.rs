@@ -31,4 +31,8 @@ impl Camera {
         self.frame_count += 1;
         resize(&frame, self.settings.size)
     }
+
+    pub fn frame_count(&self) -> i64 {
+        self.frame_count
+    }
 }
