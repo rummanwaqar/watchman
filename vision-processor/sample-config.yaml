@@ -1,0 +1,21 @@
+camera:
+  camera_id: 0
+  size: [1280, 720]
+motion_detector:
+  motion_threshold: 0.05
+  temporal_diff:
+    blur_size: 5
+    thresh: 60.0
+  background_diff:
+    thresh: 70.0
+    blur_size: 5
+    alpha: 0.1
+recorder:
+  storage_path: "path/for/storage"
+  video_length: 20
+mailer:
+  from: "from email"
+  to: "to email"
+  username: "smtp username"
+  password: "smtp password"
+  smtp: "smtp.gmail.com"
