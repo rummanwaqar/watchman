@@ -37,7 +37,7 @@ pub async fn run(
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(AppState {
-                tera: Tera::new("templates/**/*").unwrap(),
+                tera: Tera::new("web-app/templates/**/*").unwrap(),
                 username: config.username.clone(),
                 password: config.password.clone(),
                 data_path: config.data_directory.clone(),
@@ -55,7 +55,7 @@ pub async fn run(
                     .route("/logout", web::post().to(routes::logout::post))
                     .service(fs::Files::new("/data", config.data_directory.clone())),
             )
-            .service(fs::Files::new("/static", "static"))
+            .service(fs::Files::new("/static", "web-app/static"))
             .default_service(web::get().to(routes::login::get))
     })
     .listen(listener)?
