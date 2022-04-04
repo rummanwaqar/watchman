@@ -5,5 +5,7 @@ edition = "2021"
 
 [dependencies]
 opencv = "0.63"
+config = "0.13.0"
 chrono = "0.4.19"
 lettre = "0.10.0-rc.5"
+serde = "1.0.136"

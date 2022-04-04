@@ -3,7 +3,7 @@ use lettre::transport::smtp::response::Response;
 use lettre::transport::smtp::Error;
 use lettre::{Message, SmtpTransport, Transport};
 
-#[derive(Debug)]
+#[derive(serde::Deserialize, Debug)]
 pub struct Settings {
     pub from: String,
     pub to: String,

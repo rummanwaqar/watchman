@@ -5,11 +5,11 @@ use opencv::imgcodecs::imread;
 use opencv::ximgproc::threshold;
 use opencv::{core, highgui, imgcodecs, imgproc, prelude::*, types, videoio, Result};
 use std::fs::DirEntry;
-use std::{env, fs};
+use std::{env, fs, thread, time};
 
 use vision_processor::helpers::{add, apply_mask, bitwise_not, bitwise_or, weighted_sum};
 use vision_processor::recorder::{write_files, Recorder};
-use vision_processor::{background_subtraction, recorder};
+use vision_processor::{background_subtraction, configuration, recorder};
 use vision_processor::{mailer, temporal_difference};
 
 fn main() -> Result<()> {
@@ -20,10 +20,11 @@ fn main() -> Result<()> {
 
     let mut count = 0;
 
-    let mut r = Recorder::new(recorder::Settings {
-        storage_path: "/home/rumman/Videos/".to_string(),
-        video_length: 20,
-    });
+    let config = configuration::get_configuration().expect("Unable to load configuration file");
+
+    let mut r = Recorder::new(config.recorder);
+
+    // return Ok(());
 
     loop {
         cam.read(&mut frame)?;
@@ -31,19 +32,12 @@ fn main() -> Result<()> {
         if r.completed() {
             let filename = write_files(&r);
             mailer::send_notification(
-                mailer::Settings {
-                    from: "rumman.waqar05@gmail.com".to_string(),
-                    to: "waqar@ualberta.ca".to_string(),
-                    username: "rumman.waqar05@gmail.com".to_string(),
-                    password: "hxb-xfg!egb!AJB8cpm".to_string(),
-                    smtp: "smtp.gmail.com".to_string(),
-                },
+                config.mailer,
                 &filename,
             );
             break;
         }
-        // highgui::imshow("bg_sub", &frame)?;
-        highgui::wait_key(1)?;
+        thread::sleep(time::Duration::from_millis(66));
     }
     Ok(())
 }

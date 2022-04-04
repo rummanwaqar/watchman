@@ -10,7 +10,7 @@ pub struct Recorder {
     settings: Settings,
 }
 
-#[derive(Debug)]
+#[derive(serde::Deserialize, Debug)]
 pub struct Settings {
     pub storage_path: String,
     pub video_length: i64,
