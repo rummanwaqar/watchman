@@ -1,5 +1,5 @@
 use opencv::core::Mat;
-use opencv::{prelude::*, *};
+use opencv::*;
 
 use crate::helpers::*;
 
@@ -9,7 +9,7 @@ pub struct TemporalDifference {
     settings: Settings,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, serde::Deserialize, Debug)]
 pub struct Settings {
     pub blur_size: i32,
     pub thresh: f64,

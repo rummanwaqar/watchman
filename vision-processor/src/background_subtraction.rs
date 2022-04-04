@@ -1,14 +1,12 @@
-use opencv::core::Mat;
-use opencv::{prelude::*, *};
-
 use crate::helpers::*;
+use opencv::core::Mat;
 
 pub struct BackgroundSubtraction {
     bg: Option<Mat>,
     settings: Settings,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, serde::Deserialize, Debug)]
 pub struct Settings {
     pub thresh: f64,
     pub blur_size: i32,
@@ -20,7 +18,7 @@ impl BackgroundSubtraction {
         BackgroundSubtraction { bg: None, settings }
     }
 
-    pub fn update(&mut self, frame: &Mat) -> opencv::Result<Option<Mat>> {
+    pub fn process(&mut self, frame: &Mat) -> opencv::Result<Option<Mat>> {
         match self.bg {
             None => {
                 self.bg = Some(frame.clone());
@@ -28,7 +26,7 @@ impl BackgroundSubtraction {
             }
             Some(_) => {
                 let mask = self.calculate_difference(frame)?;
-                self.update_background(frame, &mask);
+                self.update_background(frame, &mask)?;
                 Ok(Some(mask))
             }
         }
@@ -45,13 +43,13 @@ impl BackgroundSubtraction {
         // create update image with background pixels from new image,
         // and use the existing image for the rest of the pixels
         let background_pixels = apply_mask(frame, &bitwise_not(mask)?)?;
-        let foreground_pixels = apply_mask(&self.bg.as_ref().unwrap(), mask)?;
+        let foreground_pixels = apply_mask(self.bg.as_ref().unwrap(), mask)?;
         let update_image = add(&background_pixels, &foreground_pixels)?;
 
         // update background with weighted sum of old and new background
         self.bg = Some(weighted_sum(
             &update_image,
-            &self.bg.as_ref().unwrap(),
+            self.bg.as_ref().unwrap(),
             self.settings.alpha,
         )?);
         Ok(())

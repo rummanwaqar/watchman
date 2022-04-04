@@ -36,7 +36,7 @@ impl Recorder {
     }
 
     pub fn completed(&self) -> bool {
-        return self.completed;
+        self.completed
     }
 }
 
@@ -67,16 +67,19 @@ pub fn write_files(recorder: &Recorder) -> String {
     )
     .expect("File writer failed to work correctly");
     for frame in &recorder.frames {
-        writer.write(frame);
+        writer
+            .write(frame)
+            .expect("Failed to write to video writer");
     }
-    writer.release();
+    writer.release().expect("Failed to release video writer");
 
     // write thumbnail
     opencv::imgcodecs::imwrite(
         &*(filepath.clone() + ".png"),
         &recorder.frames[0],
         &opencv::core::Vector::new(),
-    );
+    )
+    .expect("Failed to create thumbnail");
 
     println!("{} written with {} frames", filepath, recorder.frames.len());
     filename + ".mp4"
