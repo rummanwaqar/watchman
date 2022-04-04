@@ -12,7 +12,7 @@ pub struct Settings {
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     let config = Config::builder()
-        .add_source(config::File::with_name("configuration"))
+        .add_source(config::File::with_name("config-web-server"))
         .build()?;
     config.try_deserialize()
 }
