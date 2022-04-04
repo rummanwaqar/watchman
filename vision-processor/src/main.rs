@@ -7,6 +7,8 @@ fn main() -> opencv::Result<()> {
     let mut motion_detector = motion_detector::MotionDetector::new(config.motion_detector);
     let mut recorder = None;
 
+    println!("Camera server started. Waiting for motion ...");
+
     loop {
         let frame = camera.read()?;
         // allow camera to properly turn on

@@ -6,14 +6,6 @@ use web_app::run;
 async fn main() -> std::io::Result<()> {
     let config = get_configuration().unwrap();
 
-    // let mut interval_timer = tokio::time::interval(chrono::Duration::seconds(10).to_std().unwrap());
-    // loop {
-    //     interval_timer.tick().await;
-    //
-    //     tokio::spawn(async move {
-    //         println!("hey");
-    //     });
-    // }
-    //
+    println!("Watchman web application is running on http://127.0.0.1:8000");
     run(TcpListener::bind("127.0.0.1:8000")?, config).await
 }
