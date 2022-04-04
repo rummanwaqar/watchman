@@ -38,7 +38,6 @@ impl MotionDetector {
             let temporal_output = temporal_output.as_ref().unwrap();
             let mask = helpers::bitwise_or(background_output, temporal_output)?;
             let motion_ratio = calculate_motion_from_mask(&mask)?;
-            println!("{}", motion_ratio);
             return Ok((mask, motion_ratio > self.settings.motion_threshold));
         }
         Ok((Mat::default(), false))

@@ -12,7 +12,7 @@ pub struct Settings {
     pub smtp: String,
 }
 
-pub fn send_notification(settings: Settings, filename: &str) -> Result<Response, Error> {
+pub fn send_notification(settings: &Settings, filename: &str) -> Result<Response, Error> {
     let email = Message::builder()
         .from(settings.from.parse().unwrap())
         .reply_to(settings.from.parse().unwrap())
@@ -24,7 +24,7 @@ pub fn send_notification(settings: Settings, filename: &str) -> Result<Response,
         )
         .unwrap();
 
-    let creds = Credentials::new(settings.username, settings.password);
+    let creds = Credentials::new(settings.username.clone(), settings.password.clone());
 
     let mailer = SmtpTransport::relay(&settings.smtp)
         .unwrap()

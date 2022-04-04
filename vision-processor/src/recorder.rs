@@ -17,12 +17,15 @@ pub struct Settings {
 }
 
 impl Recorder {
-    pub fn new(settings: Settings) -> Self {
+    pub fn new(settings: &Settings) -> Self {
         Recorder {
             frames: vec![],
             start_time: Utc::now().time(),
             completed: false,
-            settings,
+            settings: Settings {
+                storage_path: settings.storage_path.clone(),
+                video_length: settings.video_length,
+            },
         }
     }
 
