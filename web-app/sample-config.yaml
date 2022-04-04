@@ -1,0 +1,5 @@
+data_directory: "path/for/storage"
+secret_key: "my-very-long-key-should-be-removed-from-here-and-moved-to-application-settings"
+redis_uri: "redis://127.0.0.1:6379"
+username: "admin"
+password: "password"
